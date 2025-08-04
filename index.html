@@ -59,6 +59,7 @@
             width: 100%;
             text-align: left;
             position: relative;
+            padding-right: 40px;
         }
 
         .weapon-dropdown-btn::after {
@@ -919,15 +920,19 @@
                 top: 10px;
                 left: 10px;
                 padding: 10px;
+                min-width: 180px;
             }
             
             .weapon-dropdown-btn {
                 padding: 10px 15px;
                 font-size: 14px;
+                padding-right: 35px;
             }
             
             .weapon-dropdown-content {
-                min-width: 180px;
+                min-width: 160px;
+                left: 0;
+                right: 0;
             }
             
             .weapon-dropdown-content .weapon-btn {
@@ -946,6 +951,14 @@
                 bottom: 10px;
                 font-size: 12px;
                 padding: 8px 15px;
+            }
+            
+            .weapon-display {
+                bottom: 60px;
+                right: 10px;
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
             }
         }
     </style>
@@ -1072,7 +1085,8 @@
                 let isMouseDown = false;
                 
                 this.gameContainer.addEventListener('mousedown', (e) => {
-                    if (this.isSprayMode) {
+                    // Don't start spraying if clicking on UI elements
+                    if (this.isSprayMode && !e.target.closest('.weapon-selector') && !e.target.closest('.score') && !e.target.closest('.instructions')) {
                         isMouseDown = true;
                         this.isSprayingActive = true;
                         this.sprayPaint(e.clientX, e.clientY);
@@ -1094,7 +1108,8 @@
 
                 // Touch events for mobile
                 this.gameContainer.addEventListener('touchstart', (e) => {
-                    if (this.isSprayMode) {
+                    // Don't start spraying if touching UI elements
+                    if (this.isSprayMode && !e.target.closest('.weapon-selector') && !e.target.closest('.score') && !e.target.closest('.instructions')) {
                         const touch = e.touches[0];
                         this.isSprayingActive = true;
                         this.sprayPaint(touch.clientX, touch.clientY);
@@ -1219,7 +1234,27 @@
             }
 
             spawnObject() {
-                const type = this.objectTypes[Math.floor(Math.random() * this.objectTypes.length)];
+                // Ensure equal distribution of objects
+                const typeCounts = {};
+                this.objects.forEach(obj => {
+                    const objType = obj.className.split(' ')[1]; // Get the type from className
+                    typeCounts[objType] = (typeCounts[objType] || 0) + 1;
+                });
+                
+                // Find the least common type
+                let leastCommonType = this.objectTypes[0];
+                let minCount = typeCounts[leastCommonType] || 0;
+                
+                for (let type of this.objectTypes) {
+                    const count = typeCounts[type] || 0;
+                    if (count < minCount) {
+                        minCount = count;
+                        leastCommonType = type;
+                    }
+                }
+                
+                // 70% chance to spawn the least common type, 30% chance for random
+                const type = Math.random() < 0.7 ? leastCommonType : this.objectTypes[Math.floor(Math.random() * this.objectTypes.length)];
                 const object = document.createElement('div');
                 object.className = `object ${type}`;
                 
@@ -1243,10 +1278,10 @@
                 object.maxHealth = object.health;
                 object.crackLevel = 0;
                 
-                // Much better scattered positioning - avoid clustering completely
-                const margin = 80;
-                const maxX = window.innerWidth - 160;
-                const maxY = window.innerHeight - 160;
+                // Better mobile-friendly positioning
+                const margin = 60;
+                const maxX = Math.min(window.innerWidth - 120, 800); // Cap width for mobile
+                const maxY = Math.min(window.innerHeight - 120, 600); // Cap height for mobile
                 
                 // Use a more random distribution with minimum distance
                 let attempts = 0;
@@ -1691,7 +1726,7 @@
             }
 
             isTooCloseToOtherObjects(x, y) {
-                const minDistance = 100;
+                const minDistance = 80; // Reduced for mobile
                 for (let obj of this.objects) {
                     const objRect = obj.getBoundingClientRect();
                     const objX = objRect.left + objRect.width / 2;
