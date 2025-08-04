@@ -1278,20 +1278,48 @@
                 object.maxHealth = object.health;
                 object.crackLevel = 0;
                 
-                // Better mobile-friendly positioning
-                const margin = 60;
-                const maxX = Math.min(window.innerWidth - 120, 800); // Cap width for mobile
-                const maxY = Math.min(window.innerHeight - 120, 600); // Cap height for mobile
+                // Even distribution across the entire screen
+                const margin = 50;
+                const maxX = window.innerWidth - 100;
+                const maxY = window.innerHeight - 100;
                 
-                // Use a more random distribution with minimum distance
-                let attempts = 0;
-                let x, y;
+                // Use zone-based distribution for even spread
+                const zones = 4; // 2x2 grid
+                const zoneWidth = maxX / zones;
+                const zoneHeight = maxY / zones;
                 
-                do {
-                    x = margin + Math.random() * maxX;
-                    y = margin + Math.random() * maxY;
-                    attempts++;
-                } while (this.isTooCloseToOtherObjects(x, y) && attempts < 50);
+                // Find the zone with the least objects
+                const zoneCounts = new Array(zones * zones).fill(0);
+                this.objects.forEach(obj => {
+                    const rect = obj.getBoundingClientRect();
+                    const zoneX = Math.floor((rect.left - margin) / zoneWidth);
+                    const zoneY = Math.floor((rect.top - margin) / zoneHeight);
+                    const zoneIndex = zoneY * zones + zoneX;
+                    if (zoneIndex >= 0 && zoneIndex < zones * zones) {
+                        zoneCounts[zoneIndex]++;
+                    }
+                });
+                
+                // Find the zone with the least objects
+                let targetZone = 0;
+                let zoneMinCount = zoneCounts[0];
+                for (let i = 1; i < zoneCounts.length; i++) {
+                    if (zoneCounts[i] < zoneMinCount) {
+                        zoneMinCount = zoneCounts[i];
+                        targetZone = i;
+                    }
+                }
+                
+                // Calculate position within the target zone
+                const zoneX = targetZone % zones;
+                const zoneY = Math.floor(targetZone / zones);
+                
+                // Add some randomness within the zone
+                const zoneOffsetX = Math.random() * zoneWidth * 0.8;
+                const zoneOffsetY = Math.random() * zoneHeight * 0.8;
+                
+                const x = margin + (zoneX * zoneWidth) + zoneOffsetX;
+                const y = margin + (zoneY * zoneHeight) + zoneOffsetY;
                 
                 object.style.left = x + 'px';
                 object.style.top = y + 'px';
