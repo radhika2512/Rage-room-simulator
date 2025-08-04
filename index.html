@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rage Room Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            overflow: hidden;
+            cursor: crosshair;
+            user-select: none;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #333, #444);
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(255,255,0,0.1) 50px, rgba(255,255,0,0.1) 100px),
+                repeating-linear-gradient(-45deg, transparent, transparent 50px, rgba(255,255,0,0.05) 50px, rgba(255,255,0,0.05) 100px);
+            overflow: hidden;
+        }
+
+        .weapon-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ffdd00;
+            min-width: 200px;
+        }
+
+        .weapon-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .weapon-dropdown-btn {
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-align: left;
+            position: relative;
+        }
+
+        .weapon-dropdown-btn::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+
+        .weapon-dropdown.show .weapon-dropdown-btn::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .weapon-dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.8);
+            z-index: 1001;
+            border-radius: 5px;
+            border: 2px solid #ffdd00;
+            top: 100%;
+            left: 0;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .weapon-dropdown-content.show {
+            display: block;
+            animation: dropdownFadeIn 0.3s ease-out;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .weapon-dropdown-content .weapon-btn {
+            display: block;
+            width: 100%;
+            margin: 0;
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            border: none;
+            border-radius: 0;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .weapon-dropdown-content .weapon-btn:hover {
+            background: linear-gradient(45deg, #ff6666, #ff8888);
+        }
+
+        .weapon-dropdown-content .weapon-btn.active {
+            background: linear-gradient(45deg, #ffdd00, #ffee00);
+            color: black;
+        }
+
+        .weapon-dropdown-content .spray-btn {
+            background: linear-gradient(45deg, #ff44ff, #ff66ff) !important;
+        }
+
+        .weapon-dropdown-content .spray-btn:hover {
+            background: linear-gradient(45deg, #ff66ff, #ff88ff) !important;
+        }
+
+        .weapon-dropdown-content .spray-btn.active {
+            background: linear-gradient(45deg, #00ff00, #44ff44) !important;
+            color: black;
+        }
+
+        .weapon-dropdown-content .throw-btn {
+            background: linear-gradient(45deg, #44ff44, #66ff66) !important;
+        }
+
+        .weapon-dropdown-content .throw-btn:hover {
+            background: linear-gradient(45deg, #66ff66, #88ff88) !important;
+        }
+
+        .weapon-dropdown-content .throw-btn.active {
+            background: linear-gradient(45deg, #00ff00, #44ff44) !important;
+            color: black;
+        }
+
+        .weapon-btn {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .weapon-display {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ffdd00;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #ffdd00;
+            z-index: 1000;
+        }
+
+        .throw-btn {
+            background: linear-gradient(45deg, #44ff44, #66ff66) !important;
+        }
+
+        .throw-btn:hover {
+            background: linear-gradient(45deg, #66ff66, #88ff88) !important;
+        }
+
+        .throw-btn.active {
+            background: linear-gradient(45deg, #00ff00, #44ff44) !important;
+            color: black;
+        }
+
+        .object.grabbed {
+            transform: scale(1.1);
+            filter: brightness(1.3);
+            z-index: 1001;
+            transition: none;
+            pointer-events: none;
+        }
+
+        .object.throwable {
+            cursor: grab;
+        }
+
+        .object.throwable:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .object.throwable:active {
+            cursor: grabbing;
+        }
+
+        .weapon-btn:hover {
+            background: linear-gradient(45deg, #ff6666, #ff8888);
+            transform: scale(1.05);
+        }
+
+        .weapon-btn.active {
+            background: linear-gradient(45deg, #ffdd00, #ffee00);
+            color: black;
+        }
+
+        .spray-btn {
+            background: linear-gradient(45deg, #ff44ff, #ff66ff) !important;
+        }
+
+        .spray-btn:hover {
+            background: linear-gradient(45deg, #ff66ff, #ff88ff) !important;
+        }
+
+        .spray-btn.active {
+            background: linear-gradient(45deg, #00ff00, #44ff44) !important;
+            color: black;
+        }
+
+        .score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffdd00;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ffdd00;
+        }
+
+        .object {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .object:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .tv {
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 3px solid #333;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .tv::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 15px;
+            background: linear-gradient(45deg, #000, #111);
+            border-radius: 3px;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .tv::after {
+            content: '📺';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+        }
+
+        .glass {
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(145deg, rgba(200,220,255,0.4), rgba(150,200,255,0.7));
+            border: 2px solid rgba(255,255,255,0.9);
+            border-radius: 5px;
+            box-shadow: 
+                inset 0 0 20px rgba(255,255,255,0.4),
+                0 2px 4px rgba(0,0,0,0.2),
+                0 0 10px rgba(100,150,255,0.3);
+            backdrop-filter: blur(1px);
+        }
+
+        .plate {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #f0f0f0, #d0d0d0);
+            border-radius: 50%;
+            border: 3px solid #ccc;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .vase {
+            width: 50px;
+            height: 90px;
+            background: linear-gradient(180deg, #8B4513, #A0522D);
+            border-radius: 25px 25px 10px 10px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .vase::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            right: 10px;
+            height: 20px;
+            background: linear-gradient(180deg, #A0522D, #8B4513);
+            border-radius: 15px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .bottle {
+            width: 30px;
+            height: 100px;
+            background: linear-gradient(180deg, #228B22, #006400);
+            border-radius: 3px 3px 15px 15px;
+            position: relative;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.3),
+                inset 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .bottle::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 8px;
+            right: 8px;
+            height: 20px;
+            background: #8B4513;
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .mirror {
+            width: 90px;
+            height: 120px;
+            background: linear-gradient(145deg, rgba(200,200,255,0.8), rgba(230,230,255,0.9));
+            border: 5px solid #C0C0C0;
+            border-radius: 10px;
+            box-shadow: 
+                inset 0 0 30px rgba(255,255,255,0.5),
+                0 4px 8px rgba(0,0,0,0.3),
+                0 0 15px rgba(100,150,255,0.4);
+            backdrop-filter: blur(0.5px);
+        }
+
+        .computer {
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(145deg, #404040, #202020);
+            border: 2px solid #666;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .computer::before {
+            content: '💻';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .laptop {
+            width: 90px;
+            height: 60px;
+            background: linear-gradient(145deg, #404040, #202020);
+            border: 2px solid #666;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .laptop::before {
+            content: '💻';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .cup {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 2px solid #ccc;
+            border-radius: 20px 20px 5px 5px;
+            position: relative;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.3),
+                inset 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        .cup::before {
+            content: '☕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+        }
+
+        .real-computer {
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(145deg, #404040, #202020);
+            border: 2px solid #666;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .real-computer::before {
+            content: '💻';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .real-laptop {
+            width: 90px;
+            height: 60px;
+            background: linear-gradient(145deg, #404040, #202020);
+            border: 2px solid #666;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .real-laptop::before {
+            content: '💻';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .standalone-computer {
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(145deg, #404040, #202020);
+            border: 2px solid #666;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .standalone-computer::before {
+            content: '💻';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .standalone-laptop {
+            width: 90px;
+            height: 60px;
+            background: linear-gradient(145deg, #404040, #202020);
+            border: 2px solid #666;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .standalone-laptop::before {
+            content: '💻';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .standalone-cup {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 2px solid #ccc;
+            border-radius: 20px 20px 5px 5px;
+            position: relative;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.3),
+                inset 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        .standalone-cup::before {
+            content: '☕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+        }
+
+        .standalone-table {
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(145deg, #8B4513, #A0522D);
+            border: 3px solid #654321;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 6px 12px rgba(0,0,0,0.4),
+                inset 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .standalone-table::before {
+            content: '🪑';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+        }
+
+        .standalone-microwave {
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 3px solid #ccc;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .standalone-microwave::before {
+            content: '📺';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+        }
+
+        .standalone-clock {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #f0f0f0, #d0d0d0);
+            border: 3px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .standalone-clock::before {
+            content: '🕐';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+        }
+
+        .table {
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(145deg, #8B4513, #A0522D);
+            border: 3px solid #654321;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 6px 12px rgba(0,0,0,0.4),
+                inset 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .table::before {
+            content: '🪑';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+        }
+
+        .microwave {
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 3px solid #ccc;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .microwave::before {
+            content: '📺';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+        }
+
+        .clock {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #f0f0f0, #d0d0d0);
+            border: 3px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .clock::before {
+            content: '🕐';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+        }
+
+        .destruction-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffdd00;
+            border-radius: 50%;
+            animation: explode 0.8s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+
+        .crack {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, transparent 40%, rgba(0,0,0,0.8) 50%, transparent 60%),
+                linear-gradient(-45deg, transparent 40%, rgba(0,0,0,0.8) 50%, transparent 60%),
+                linear-gradient(0deg, transparent 45%, rgba(0,0,0,0.6) 50%, transparent 55%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .crack-level-2 {
+            background-image: 
+                linear-gradient(45deg, transparent 30%, rgba(0,0,0,0.9) 50%, transparent 70%),
+                linear-gradient(-45deg, transparent 30%, rgba(0,0,0,0.9) 50%, transparent 70%),
+                linear-gradient(0deg, transparent 35%, rgba(0,0,0,0.8) 50%, transparent 65%),
+                linear-gradient(90deg, transparent 35%, rgba(0,0,0,0.7) 50%, transparent 65%);
+        }
+
+        .crack-level-3 {
+            background-image: 
+                linear-gradient(30deg, transparent 20%, rgba(0,0,0,1) 50%, transparent 80%),
+                linear-gradient(-30deg, transparent 20%, rgba(0,0,0,1) 50%, transparent 80%),
+                linear-gradient(60deg, transparent 25%, rgba(0,0,0,0.9) 50%, transparent 75%),
+                linear-gradient(-60deg, transparent 25%, rgba(0,0,0,0.9) 50%, transparent 75%),
+                linear-gradient(0deg, transparent 25%, rgba(0,0,0,0.8) 50%, transparent 75%),
+                linear-gradient(90deg, transparent 25%, rgba(0,0,0,0.8) 50%, transparent 75%);
+        }
+
+        .shattered {
+            animation: shatter 0.5s ease-out forwards;
+        }
+
+        @keyframes shatter {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.2) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        .shard {
+            position: absolute;
+            background: #666;
+            border-radius: 2px;
+            pointer-events: none;
+            animation: shard-fall 3s ease-out forwards;
+        }
+
+        @keyframes shard-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(200px) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        .spray-paint {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #ffdd00;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ffdd00;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .disclaimer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #000, #1a0000, #000);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff0000;
+            font-family: 'Arial Black', Arial, sans-serif;
+            text-align: center;
+        }
+
+        .disclaimer-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #ff0000;
+            animation: pulse 2s infinite;
+        }
+
+        .disclaimer-warning {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff4444;
+            animation: flash 1s infinite;
+        }
+
+        .disclaimer-text {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #ffdd00;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .enter-button {
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: 3px solid #ffdd00;
+            border-radius: 10px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: glow 2s infinite;
+        }
+
+        .enter-button:hover {
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ff0000;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes flash {
+            0%, 50% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px #ff0000; }
+            50% { box-shadow: 0 0 40px #ff0000, 0 0 60px #ff4444; }
+        }
+
+        .disclaimer-hidden {
+            display: none;
+        }
+
+        .health-bar {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,0,0,0.3);
+            border-radius: 2px;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .damage-number {
+            position: absolute;
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 18px;
+            pointer-events: none;
+            animation: damage-float 1s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        @keyframes damage-float {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .weapon-selector {
+                top: 10px;
+                left: 10px;
+                padding: 10px;
+            }
+            
+            .weapon-dropdown-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .weapon-dropdown-content {
+                min-width: 180px;
+            }
+            
+            .weapon-dropdown-content .weapon-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .score {
+                top: 10px;
+                right: 10px;
+                font-size: 18px;
+                padding: 8px 15px;
+            }
+            
+            .instructions {
+                bottom: 10px;
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="disclaimer-overlay" id="disclaimerOverlay">
+        <div class="disclaimer-title">RAGE ROOM</div>
+        <div class="disclaimer-warning">⚠️ ENTER AT YOUR OWN RISK ⚠️</div>
+        <div class="disclaimer-text">
+            This is a controlled environment for stress relief and entertainment.<br>
+            All objects are virtual and no real damage will occur.<br>
+            Let your rage out safely and responsibly.
+        </div>
+        <button class="enter-button" id="enterButton">ENTER WHEN READY</button>
+    </div>
+
+    <div id="gameContainer" class="disclaimer-hidden">
+        <div class="weapon-selector">
+            <div class="weapon-dropdown">
+                <button class="weapon-dropdown-btn" id="weaponDropdownBtn">🔨 Sledgehammer</button>
+                <div class="weapon-dropdown-content" id="weaponDropdown">
+                    <button class="weapon-btn active" data-weapon="hammer">🔨 Sledgehammer</button>
+                    <button class="weapon-btn" data-weapon="sword">🗡️ Sword</button>
+                    <button class="weapon-btn" data-weapon="bat">🏏 Baseball Bat</button>
+                    <button class="weapon-btn" data-weapon="axe">🪓 Axe</button>
+                    <button class="weapon-btn" data-weapon="crowbar">🔧 Crowbar</button>
+                    <button class="weapon-btn" data-weapon="boxing">🥊 Boxing Gloves</button>
+                    <button class="weapon-btn spray-btn" data-weapon="spray">🎨 Spray Paint</button>
+                    <button class="weapon-btn throw-btn" data-weapon="throw">🤾 Throw Objects</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="score">
+            Score: <span id="scoreValue">0</span>
+        </div>
+
+        <div class="instructions">
+            <span id="instructionText">Select a weapon and hit objects multiple times to break them! Spray paint mode: click and drag to spray.</span>
+        </div>
+
+        <div class="weapon-display" id="weaponDisplay">
+            🔨
+        </div>
+    </div>
+
+    <script>
+        class RageRoomGame {
+            constructor() {
+                this.score = 0;
+                this.currentWeapon = 'hammer';
+                this.gameContainer = document.getElementById('gameContainer');
+                this.scoreElement = document.getElementById('scoreValue');
+                this.instructionElement = document.getElementById('instructionText');
+                this.weaponDisplay = document.getElementById('weaponDisplay');
+                this.objects = [];
+                this.objectTypes = ['tv', 'glass', 'plate', 'vase', 'bottle', 'mirror', 'computer', 'laptop', 'cup', 'table', 'microwave', 'clock'];
+                this.isSprayMode = false;
+                this.isThrowMode = false;
+                this.isSprayingActive = false;
+                this.grabbedObject = null;
+                this.sprayColors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44', '#ff44ff', '#44ffff', '#ffffff', '#000000'];
+                this.currentSprayColor = this.sprayColors[0];
+                
+                this.init();
+            }
+
+            init() {
+                this.setupWeaponSelector();
+                this.setupSprayPaint();
+                this.setupThrowMechanics();
+            }
+
+            startGame() {
+                this.spawnInitialObjects();
+                this.startObjectSpawning();
+            }
+
+            setupWeaponSelector() {
+                const weaponBtns = document.querySelectorAll('.weapon-btn');
+                const dropdownBtn = document.getElementById('weaponDropdownBtn');
+                const dropdown = document.getElementById('weaponDropdown');
+                
+                // Dropdown toggle
+                dropdownBtn.addEventListener('click', () => {
+                    dropdown.classList.toggle('show');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.weapon-dropdown')) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+                
+                weaponBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        weaponBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentWeapon = btn.dataset.weapon;
+                        this.isSprayMode = this.currentWeapon === 'spray';
+                        this.isThrowMode = this.currentWeapon === 'throw';
+                        
+                        // Update dropdown button text
+                        dropdownBtn.textContent = btn.textContent;
+                        
+                        this.updateCursor();
+                        this.updateInstructions();
+                        this.updateWeaponDisplay();
+                        this.updateObjectInteractions();
+                        
+                        // Close dropdown
+                        dropdown.classList.remove('show');
+                    });
+                });
+                
+                this.updateCursor();
+                this.updateInstructions();
+                this.updateWeaponDisplay();
+                this.updateObjectInteractions();
+            }
+
+            setupSprayPaint() {
+                let isMouseDown = false;
+                
+                this.gameContainer.addEventListener('mousedown', (e) => {
+                    if (this.isSprayMode) {
+                        isMouseDown = true;
+                        this.isSprayingActive = true;
+                        this.sprayPaint(e.clientX, e.clientY);
+                        e.preventDefault();
+                    }
+                });
+
+                this.gameContainer.addEventListener('mousemove', (e) => {
+                    if (this.isSprayMode && isMouseDown) {
+                        this.sprayPaint(e.clientX, e.clientY);
+                        e.preventDefault();
+                    }
+                });
+
+                this.gameContainer.addEventListener('mouseup', () => {
+                    isMouseDown = false;
+                    this.isSprayingActive = false;
+                });
+
+                // Touch events for mobile
+                this.gameContainer.addEventListener('touchstart', (e) => {
+                    if (this.isSprayMode) {
+                        const touch = e.touches[0];
+                        this.isSprayingActive = true;
+                        this.sprayPaint(touch.clientX, touch.clientY);
+                        e.preventDefault();
+                    }
+                });
+
+                this.gameContainer.addEventListener('touchmove', (e) => {
+                    if (this.isSprayMode) {
+                        const touch = e.touches[0];
+                        this.sprayPaint(touch.clientX, touch.clientY);
+                        e.preventDefault();
+                    }
+                });
+
+                this.gameContainer.addEventListener('touchend', () => {
+                    this.isSprayingActive = false;
+                });
+
+                // Change spray color with right click or double tap
+                this.gameContainer.addEventListener('contextmenu', (e) => {
+                    if (this.isSprayMode) {
+                        this.changeSprayColor();
+                        e.preventDefault();
+                    }
+                });
+
+                this.gameContainer.addEventListener('dblclick', (e) => {
+                    if (this.isSprayMode) {
+                        this.changeSprayColor();
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            changeSprayColor() {
+                const currentIndex = this.sprayColors.indexOf(this.currentSprayColor);
+                this.currentSprayColor = this.sprayColors[(currentIndex + 1) % this.sprayColors.length];
+            }
+
+            sprayPaint(x, y) {
+                if (!this.isSprayingActive) return;
+                
+                // Create multiple spray dots for realistic effect
+                for (let i = 0; i < 3; i++) {
+                    const spray = document.createElement('div');
+                    spray.className = 'spray-paint';
+                    
+                    const size = Math.random() * 8 + 4;
+                    const offsetX = (Math.random() - 0.5) * 20;
+                    const offsetY = (Math.random() - 0.5) * 20;
+                    
+                    spray.style.width = size + 'px';
+                    spray.style.height = size + 'px';
+                    spray.style.left = (x + offsetX) + 'px';
+                    spray.style.top = (y + offsetY) + 'px';
+                    spray.style.background = this.currentSprayColor;
+                    spray.style.opacity = Math.random() * 0.6 + 0.4;
+                    
+                    this.gameContainer.appendChild(spray);
+                }
+            }
+
+            updateInstructions() {
+                if (this.isSprayMode) {
+                    this.instructionElement.textContent = 'Spray Paint Mode: Click and drag to spray. Right-click/double-tap to change color.';
+                } else if (this.isThrowMode) {
+                    this.instructionElement.textContent = 'Throw Mode: Drag objects to throw them!';
+                } else {
+                    this.instructionElement.textContent = 'Hit objects multiple times to break them! Watch the health bars.';
+                }
+            }
+
+            updateWeaponDisplay() {
+                const weaponIcons = {
+                    hammer: '🔨',
+                    sword: '🗡️',
+                    bat: '🏏',
+                    axe: '🪓',
+                    crowbar: '🔧',
+                    boxing: '🥊',
+                    spray: '🪫',
+                    throw: '🤾'
+                };
+                this.weaponDisplay.textContent = weaponIcons[this.currentWeapon] || '🔨';
+            }
+
+            updateObjectInteractions() {
+                this.objects.forEach(obj => {
+                    if (this.isThrowMode) {
+                        obj.classList.add('throwable');
+                        obj.style.cursor = 'grab';
+                    } else {
+                        obj.classList.remove('throwable');
+                        obj.style.cursor = 'pointer';
+                    }
+                });
+            }
+
+            updateCursor() {
+                if (this.isSprayMode) {
+                    this.gameContainer.style.cursor = `url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext y='24' font-size='24'%3E🪫%3C/text%3E%3C/svg%3E") 16 16, auto`;
+                } else if (this.isThrowMode) {
+                    this.gameContainer.style.cursor = 'grab';
+                } else {
+                    const cursors = {
+                        hammer: 'url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'24\' font-size=\'24\'%3E🔨%3C/text%3E%3C/svg%3E") 16 16, auto',
+                        sword: 'url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'24\' font-size=\'24\'%3E🗡️%3C/text%3E%3C/svg%3E") 16 16, auto',
+                        bat: 'url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'24\' font-size=\'24\'%3E🏏%3C/text%3E%3C/svg%3E") 16 16, auto',
+                        axe: 'url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'24\' font-size=\'24\'%3E🪓%3C/text%3E%3C/svg%3E") 16 16, auto',
+                        crowbar: 'url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'24\' font-size=\'24\'%3E🔧%3C/text%3E%3C/svg%3E") 16 16, auto',
+                        boxing: 'url("data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 32 32\'%3E%3Ctext y=\'24\' font-size=\'24\'%3E🥊%3C/text%3E%3C/svg%3E") 16 16, auto'
+                    };
+                    this.gameContainer.style.cursor = cursors[this.currentWeapon];
+                }
+            }
+
+            spawnInitialObjects() {
+                for (let i = 0; i < 80; i++) {
+                    this.spawnObject();
+                }
+            }
+
+            spawnObject() {
+                const type = this.objectTypes[Math.floor(Math.random() * this.objectTypes.length)];
+                const object = document.createElement('div');
+                object.className = `object ${type}`;
+                
+                // Set object health based on type
+                const healthMap = {
+                    tv: 4,
+                    computer: 4,
+                    laptop: 3,
+                    mirror: 3,
+                    vase: 2,
+                    glass: 2,
+                    bottle: 2,
+                    plate: 3,
+                    cup: 1,
+                    table: 5,
+                    microwave: 4,
+                    clock: 2
+                };
+                
+                object.health = healthMap[type] || 3;
+                object.maxHealth = object.health;
+                object.crackLevel = 0;
+                
+                // Much better scattered positioning - avoid clustering completely
+                const margin = 80;
+                const maxX = window.innerWidth - 160;
+                const maxY = window.innerHeight - 160;
+                
+                // Use a more random distribution with minimum distance
+                let attempts = 0;
+                let x, y;
+                
+                do {
+                    x = margin + Math.random() * maxX;
+                    y = margin + Math.random() * maxY;
+                    attempts++;
+                } while (this.isTooCloseToOtherObjects(x, y) && attempts < 50);
+                
+                object.style.left = x + 'px';
+                object.style.top = y + 'px';
+                
+                // Add health bar
+                const healthBar = document.createElement('div');
+                healthBar.className = 'health-bar';
+                const healthFill = document.createElement('div');
+                healthFill.className = 'health-fill';
+                healthFill.style.width = '100%';
+                healthBar.appendChild(healthFill);
+                object.appendChild(healthBar);
+                
+                // Add click event for non-throw modes
+                object.addEventListener('click', (e) => {
+                    if (!this.isThrowMode && !this.isSprayMode) {
+                        this.hitObject(e.target.closest('.object'));
+                        e.stopPropagation();
+                    }
+                });
+                
+                // Add touch events for mobile
+                object.addEventListener('touchstart', (e) => {
+                    if (!this.isThrowMode && !this.isSprayMode) {
+                        this.hitObject(e.target.closest('.object'));
+                        e.stopPropagation();
+                    }
+                });
+                
+                this.gameContainer.appendChild(object);
+                this.objects.push(object);
+                
+                // Update object interactions for new objects
+                if (this.isThrowMode) {
+                    object.classList.add('throwable');
+                    object.style.cursor = 'grab';
+                }
+            }
+
+            hitObject(object) {
+                if (!object || object.health <= 0) return;
+                
+                // Calculate damage based on weapon
+                let damage = 1;
+                if (this.currentWeapon === 'boxing') {
+                    damage = 2; // Boxing gloves do more damage
+                } else if (this.currentWeapon === 'hammer' || this.currentWeapon === 'axe') {
+                    damage = 1;
+                } else if (this.currentWeapon === 'sword') {
+                    damage = 1;
+                } else if (this.currentWeapon === 'bat') {
+                    damage = 1;
+                } else if (this.currentWeapon === 'crowbar') {
+                    damage = 1;
+                }
+                
+                // Reduce health
+                object.health -= damage;
+                
+                // Update health bar
+                const healthFill = object.querySelector('.health-fill');
+                const healthPercent = (object.health / object.maxHealth) * 100;
+                healthFill.style.width = healthPercent + '%';
+                
+                // Show damage number
+                this.showDamageNumber(object, damage);
+                
+                // Add crack effects based on damage
+                this.updateCracks(object);
+                
+                // Create hit effect
+                const rect = object.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                this.createHitEffect(x, y);
+                
+                // Show weapon swing animation
+                this.showWeaponSwing();
+                
+                // Check if object should be destroyed
+                if (object.health <= 0) {
+                    this.destroyObject(object);
+                } else {
+                    // Shake effect
+                    object.style.animation = 'none';
+                    object.offsetHeight; // Trigger reflow
+                    object.style.animation = 'shake 0.3s ease-in-out';
+                    setTimeout(() => object.style.animation = 'none', 300);
+                }
+            }
+
+            updateCracks(object) {
+                const healthPercent = object.health / object.maxHealth;
+                let crack = object.querySelector('.crack');
+                
+                if (!crack) {
+                    crack = document.createElement('div');
+                    crack.className = 'crack';
+                    object.appendChild(crack);
+                }
+                
+                if (healthPercent <= 0.33) {
+                    crack.className = 'crack crack-level-3';
+                } else if (healthPercent <= 0.66) {
+                    crack.className = 'crack crack-level-2';
+                } else {
+                    crack.className = 'crack';
+                }
+            }
+
+            showDamageNumber(object, damage = 1) {
+                const damageNum = document.createElement('div');
+                damageNum.className = 'damage-number';
+                damageNum.textContent = damage.toString();
+                
+                const rect = object.getBoundingClientRect();
+                damageNum.style.left = (rect.left + rect.width / 2) + 'px';
+                damageNum.style.top = (rect.top - 10) + 'px';
+                
+                this.gameContainer.appendChild(damageNum);
+                
+                setTimeout(() => {
+                    if (damageNum.parentNode) {
+                        damageNum.parentNode.removeChild(damageNum);
+                    }
+                }, 1000);
+            }
+
+            createHitEffect(x, y) {
+                for (let i = 0; i < 6; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    
+                    const dx = (Math.random() - 0.5) * 100;
+                    const dy = (Math.random() - 0.5) * 100;
+                    particle.style.setProperty('--dx', dx + 'px');
+                    particle.style.setProperty('--dy', dy + 'px');
+                    
+                    particle.style.background = '#ffdd00';
+                    
+                    this.gameContainer.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 800);
+                }
+            }
+
+            destroyObject(object) {
+                const rect = object.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                
+                // Create explosion effect
+                this.createExplosionEffect(x, y);
+                
+                // Create shards
+                this.createShards(object);
+                
+                // Add points based on object type
+                const points = this.getPointsForObject(object.className);
+                this.score += points;
+                this.updateScore();
+                
+                // Remove object with animation
+                object.classList.add('shattered');
+                
+                setTimeout(() => {
+                    if (object.parentNode) {
+                        object.parentNode.removeChild(object);
+                        this.objects = this.objects.filter(obj => obj !== object);
+                    }
+                }, 500);
+                
+                // Spawn new object after a delay
+                setTimeout(() => this.spawnObject(), 2000);
+            }
+
+            createShards(object) {
+                for (let i = 0; i < 8; i++) {
+                    const shard = document.createElement('div');
+                    shard.className = 'shard';
+                    
+                    const width = Math.random() * 15 + 5;
+                    const height = Math.random() * 15 + 5;
+                    shard.style.width = width + 'px';
+                    shard.style.height = height + 'px';
+                    
+                    const rect = object.getBoundingClientRect();
+                    shard.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                    shard.style.top = rect.top + 'px';
+                    
+                    // Different colors based on object type
+                    if (object.classList.contains('glass') || object.classList.contains('mirror')) {
+                        shard.style.background = 'rgba(200,220,255,0.8)';
+                    } else if (object.classList.contains('plate')) {
+                        shard.style.background = '#f0f0f0';
+                    } else if (object.classList.contains('vase')) {
+                        shard.style.background = '#8B4513';
+                    } else {
+                        shard.style.background = '#666';
+                    }
+                    
+                    this.gameContainer.appendChild(shard);
+                    
+                    setTimeout(() => {
+                        if (shard.parentNode) {
+                            shard.parentNode.removeChild(shard);
+                        }
+                    }, 3000);
+                }
+            }
+
+            getPointsForObject(className) {
+                const pointMap = {
+                    tv: 50,
+                    computer: 45,
+                    laptop: 40,
+                    mirror: 35,
+                    table: 60,
+                    microwave: 45,
+                    vase: 30,
+                    glass: 25,
+                    bottle: 20,
+                    plate: 15,
+                    cup: 10,
+                    clock: 25
+                };
+                
+                for (let type in pointMap) {
+                    if (className.includes(type)) {
+                        return pointMap[type];
+                    }
+                }
+                return 10;
+            }
+
+            createExplosionEffect(x, y) {
+                for (let i = 0; i < 12; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    
+                    const dx = (Math.random() - 0.5) * 200;
+                    const dy = (Math.random() - 0.5) * 200;
+                    particle.style.setProperty('--dx', dx + 'px');
+                    particle.style.setProperty('--dy', dy + 'px');
+                    
+                    const colors = ['#ffdd00', '#ff4444', '#44ff44', '#4444ff', '#ff44ff'];
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    this.gameContainer.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 800);
+                }
+            }
+
+            updateScore() {
+                this.scoreElement.textContent = this.score;
+            }
+
+            showWeaponSwing() {
+                this.weaponDisplay.style.transform = 'rotate(-15deg) scale(1.2)';
+                setTimeout(() => {
+                    this.weaponDisplay.style.transform = 'rotate(15deg) scale(1.1)';
+                    setTimeout(() => {
+                        this.weaponDisplay.style.transform = 'rotate(0deg) scale(1)';
+                    }, 100);
+                }, 100);
+                
+                // Special boxing animation
+                if (this.currentWeapon === 'boxing') {
+                    this.weaponDisplay.style.transform = 'rotate(-30deg) scale(1.3)';
+                    setTimeout(() => {
+                        this.weaponDisplay.style.transform = 'rotate(30deg) scale(1.2)';
+                        setTimeout(() => {
+                            this.weaponDisplay.style.transform = 'rotate(0deg) scale(1)';
+                        }, 150);
+                    }, 150);
+                }
+            }
+
+            setupThrowMechanics() {
+                let isDragging = false;
+                let dragStartX = 0;
+                let dragStartY = 0;
+                
+                // Mouse events for desktop
+                this.gameContainer.addEventListener('mousedown', (e) => {
+                    if (this.isThrowMode) {
+                        const object = e.target.closest('.object');
+                        if (object) {
+                            isDragging = true;
+                            this.grabbedObject = object;
+                            object.classList.add('grabbed');
+                            this.weaponDisplay.textContent = '🎯';
+                            this.instructionElement.textContent = 'Drag to throw!';
+                            
+                            const rect = object.getBoundingClientRect();
+                            dragStartX = e.clientX - rect.left;
+                            dragStartY = e.clientY - rect.top;
+                            e.preventDefault();
+                        }
+                    }
+                });
+                
+                this.gameContainer.addEventListener('mousemove', (e) => {
+                    if (this.isThrowMode && isDragging && this.grabbedObject) {
+                        this.grabbedObject.style.left = (e.clientX - dragStartX) + 'px';
+                        this.grabbedObject.style.top = (e.clientY - dragStartY) + 'px';
+                        e.preventDefault();
+                    }
+                });
+                
+                this.gameContainer.addEventListener('mouseup', (e) => {
+                    if (this.isThrowMode && isDragging && this.grabbedObject) {
+                        isDragging = false;
+                        this.throwObject(e.clientX, e.clientY);
+                        e.preventDefault();
+                    }
+                });
+                
+                // Touch events for mobile
+                this.gameContainer.addEventListener('touchstart', (e) => {
+                    if (this.isThrowMode) {
+                        const touch = e.touches[0];
+                        const object = document.elementFromPoint(touch.clientX, touch.clientY).closest('.object');
+                        if (object) {
+                            isDragging = true;
+                            this.grabbedObject = object;
+                            object.classList.add('grabbed');
+                            this.weaponDisplay.textContent = '🎯';
+                            this.instructionElement.textContent = 'Drag to throw!';
+                            
+                            const rect = object.getBoundingClientRect();
+                            dragStartX = touch.clientX - rect.left;
+                            dragStartY = touch.clientY - rect.top;
+                            e.preventDefault();
+                        }
+                    }
+                });
+                
+                this.gameContainer.addEventListener('touchmove', (e) => {
+                    if (this.isThrowMode && isDragging && this.grabbedObject) {
+                        const touch = e.touches[0];
+                        this.grabbedObject.style.left = (touch.clientX - dragStartX) + 'px';
+                        this.grabbedObject.style.top = (touch.clientY - dragStartY) + 'px';
+                        e.preventDefault();
+                    }
+                });
+                
+                this.gameContainer.addEventListener('touchend', (e) => {
+                    if (this.isThrowMode && isDragging && this.grabbedObject) {
+                        const touch = e.changedTouches[0];
+                        isDragging = false;
+                        this.throwObject(touch.clientX, touch.clientY);
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            handleThrowInteraction(object, event) {
+                if (!object) {
+                    console.log('No object provided to handleThrowInteraction');
+                    return;
+                }
+                
+                console.log('Throw interaction with:', object.className);
+                
+                if (!this.grabbedObject) {
+                    // Grab the object
+                    this.grabbedObject = object;
+                    object.classList.add('grabbed');
+                    this.weaponDisplay.textContent = '🎯';
+                    this.instructionElement.textContent = 'Click anywhere to throw the object! Press SPACE to throw!';
+                    console.log('Grabbed object:', object.className);
+                } else if (this.grabbedObject === object) {
+                    // Release the same object
+                    this.grabbedObject.classList.remove('grabbed');
+                    this.grabbedObject = null;
+                    this.updateWeaponDisplay();
+                    this.updateInstructions();
+                    console.log('Released object');
+                } else {
+                    // Switch to different object
+                    this.grabbedObject.classList.remove('grabbed');
+                    this.grabbedObject = object;
+                    object.classList.add('grabbed');
+                    this.weaponDisplay.textContent = '🎯';
+                    this.instructionElement.textContent = 'Click anywhere to throw the object! Press SPACE to throw!';
+                    console.log('Switched to object:', object.className);
+                }
+            }
+
+            throwObject(targetX, targetY) {
+                if (!this.grabbedObject) {
+                    console.log('No grabbed object to throw');
+                    return;
+                }
+                
+                console.log('Throwing object to:', targetX, targetY);
+                
+                const object = this.grabbedObject;
+                
+                // Instant throw - no animation delay
+                object.style.left = (targetX - object.offsetWidth / 2) + 'px';
+                object.style.top = (targetY - object.offsetHeight / 2) + 'px';
+                object.style.transform = 'rotate(360deg) scale(0.5)';
+                
+                // Remove grabbed state immediately
+                object.classList.remove('grabbed');
+                this.grabbedObject = null;
+                this.updateWeaponDisplay();
+                this.updateInstructions();
+                
+                // Destroy object instantly
+                setTimeout(() => {
+                    console.log('Destroying thrown object');
+                    this.destroyObject(object);
+                }, 100);
+                
+                console.log('Throw completed');
+            }
+
+            isTooCloseToOtherObjects(x, y) {
+                const minDistance = 100;
+                for (let obj of this.objects) {
+                    const objRect = obj.getBoundingClientRect();
+                    const objX = objRect.left + objRect.width / 2;
+                    const objY = objRect.top + objRect.height / 2;
+                    
+                    const distance = Math.sqrt((x - objX) ** 2 + (y - objY) ** 2);
+                    if (distance < minDistance) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+
+            startObjectSpawning() {
+                setInterval(() => {
+                    if (this.objects.length < 100) {
+                        this.spawnObject();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Add shake animation to CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Start the game when the page loads
+        window.addEventListener('load', () => {
+            const game = new RageRoomGame();
+            
+            // Setup disclaimer
+            const disclaimerOverlay = document.getElementById('disclaimerOverlay');
+            const gameContainer = document.getElementById('gameContainer');
+            const enterButton = document.getElementById('enterButton');
+            
+            enterButton.addEventListener('click', () => {
+                disclaimerOverlay.style.display = 'none';
+                gameContainer.classList.remove('disclaimer-hidden');
+                game.startGame();
+            });
+            
+            // Also allow Enter key to start
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Enter' && disclaimerOverlay.style.display !== 'none') {
+                    disclaimerOverlay.style.display = 'none';
+                    gameContainer.classList.remove('disclaimer-hidden');
+                    game.startGame();
+                }
+            });
+        });
+
+        // Prevent context menu on right click (except in spray mode and throw mode)
+        document.addEventListener('contextmenu', e => {
+            const sprayActive = document.querySelector('.spray-btn').classList.contains('active');
+            const throwActive = document.querySelector('.throw-btn').classList.contains('active');
+            if (!e.target.closest('#gameContainer') || (!sprayActive && !throwActive)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
