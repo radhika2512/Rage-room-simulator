@@ -273,8 +273,8 @@
         }
 
         .tv {
-            width: 120px;
-            height: 80px;
+            width: 110px;
+            height: 75px;
             background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
             border: 3px solid #333;
             border-radius: 5px;
@@ -285,10 +285,10 @@
         .tv::before {
             content: '';
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 15px;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 12px;
             background: linear-gradient(45deg, #000, #111);
             border-radius: 3px;
             box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
@@ -300,21 +300,12 @@
             bottom: -5px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 12px;
+            font-size: 20px;
+            z-index: 100;
+            color: #ffffff;
         }
 
-        .glass {
-            width: 60px;
-            height: 100px;
-            background: linear-gradient(145deg, rgba(200,220,255,0.4), rgba(150,200,255,0.7));
-            border: 2px solid rgba(255,255,255,0.9);
-            border-radius: 5px;
-            box-shadow: 
-                inset 0 0 20px rgba(255,255,255,0.4),
-                0 2px 4px rgba(0,0,0,0.2),
-                0 0 10px rgba(100,150,255,0.3);
-            backdrop-filter: blur(1px);
-        }
+
 
         .plate {
             width: 80px;
@@ -387,68 +378,66 @@
         }
 
         .computer {
-            width: 100px;
+            width: 90px;
             height: 70px;
-            background: linear-gradient(145deg, #404040, #202020);
-            border: 2px solid #666;
-            border-radius: 5px;
+            background: transparent;
+            border: 3px solid #666;
+            border-radius: 8px;
             position: relative;
-            box-shadow: 
-                0 4px 8px rgba(0,0,0,0.3),
-                inset 0 0 20px rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
         .computer::before {
-            content: '💻';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 30px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            content: '🖥️';
+            font-size: 35px;
+            z-index: 1000;
         }
 
         .laptop {
-            width: 90px;
-            height: 60px;
-            background: linear-gradient(145deg, #404040, #202020);
-            border: 2px solid #666;
-            border-radius: 5px;
+            width: 120px;
+            height: 100px;
+            background: transparent;
+            border: 5px solid #333;
+            border-radius: 15px;
             position: relative;
-            box-shadow: 
-                0 4px 8px rgba(0,0,0,0.3),
-                inset 0 0 20px rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: #ffffff;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.9);
         }
 
         .laptop::before {
             content: '💻';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 25px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 80px;
+            z-index: 1000;
         }
 
         .cup {
-            width: 40px;
-            height: 60px;
-            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
-            border: 2px solid #ccc;
-            border-radius: 20px 20px 5px 5px;
+            width: 90px;
+            height: 110px;
+            background: transparent;
+            border: 5px solid #ccc;
+            border-radius: 45px 45px 15px 15px;
             position: relative;
-            box-shadow: 
-                0 2px 4px rgba(0,0,0,0.3),
-                inset 0 0 15px rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #ffffff;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.9);
         }
 
         .cup::before {
             content: '☕';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
+            font-size: 60px;
+            z-index: 1000;
         }
 
         .real-computer {
@@ -624,8 +613,8 @@
         }
 
         .table {
-            width: 120px;
-            height: 80px;
+            width: 100px;
+            height: 60px;
             background: linear-gradient(145deg, #8B4513, #A0522D);
             border: 3px solid #654321;
             border-radius: 5px;
@@ -641,40 +630,60 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 30px;
+            font-size: 25px;
+        }
+
+        .chair {
+            width: 100px;
+            height: 120px;
+            background: transparent;
+            border: 5px solid #654321;
+            border-radius: 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            color: #ffffff;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.9);
+        }
+
+        .chair::before {
+            content: '🪑';
+            font-size: 70px;
+            z-index: 1000;
         }
 
         .microwave {
-            width: 80px;
-            height: 60px;
-            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
-            border: 3px solid #ccc;
-            border-radius: 5px;
+            width: 90px;
+            height: 70px;
+            background: rgba(0,0,0,0.3);
+            border: 4px solid #ccc;
+            border-radius: 10px;
             position: relative;
-            box-shadow: 
-                0 4px 8px rgba(0,0,0,0.3),
-                inset 0 0 20px rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            color: #ffffff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
         }
 
         .microwave::before {
             content: '📺';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 25px;
+            font-size: 45px;
+            z-index: 1000;
         }
 
         .clock {
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, #f0f0f0, #d0d0d0);
+            width: 55px;
+            height: 55px;
+            background: transparent;
             border: 3px solid #ccc;
             border-radius: 50%;
             position: relative;
             box-shadow: 
-                0 4px 8px rgba(0,0,0,0.3),
-                inset 0 0 20px rgba(255,255,255,0.2);
+                0 4px 8px rgba(0,0,0,0.3);
         }
 
         .clock::before {
@@ -684,6 +693,8 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 25px;
+            z-index: 100;
+            color: #ffffff;
         }
 
         .destruction-effect {
@@ -1015,7 +1026,7 @@
                 this.instructionElement = document.getElementById('instructionText');
                 this.weaponDisplay = document.getElementById('weaponDisplay');
                 this.objects = [];
-                this.objectTypes = ['tv', 'glass', 'plate', 'vase', 'bottle', 'mirror', 'computer', 'laptop', 'cup', 'table', 'microwave', 'clock'];
+                this.objectTypes = ['tv', 'plate', 'vase', 'bottle', 'mirror', 'computer', 'laptop', 'cup', 'table', 'chair', 'microwave', 'clock'];
                 this.isSprayMode = false;
                 this.isThrowMode = false;
                 this.isSprayingActive = false;
@@ -1228,33 +1239,140 @@
             }
 
             spawnInitialObjects() {
-                for (let i = 0; i < 80; i++) {
-                    this.spawnObject();
+                // Spawn MANY more objects to fill the screen
+                const spawnCounts = {
+                    'laptop': 15,     // Much more laptops
+                    'chair': 15,       // Much more chairs  
+                    'microwave': 12,   // More microwaves
+                    'cup': 12,         // More cups
+                    'computer': 10,    // More computers
+                    'tv': 10,          // More TVs
+                    'table': 8,        // More tables
+                    'plate': 8,        // More plates
+                    'vase': 6,         // More vases
+                    'bottle': 6,       // More bottles
+                    'mirror': 6,       // More mirrors
+                    'clock': 6         // More clocks
+                };
+                
+                for (let type of this.objectTypes) {
+                    const count = spawnCounts[type] || 3;
+                    for (let i = 0; i < count; i++) {
+                        const object = document.createElement('div');
+                        object.className = `object ${type}`;
+                        
+                        // Set object health based on type
+                        const healthMap = {
+                            tv: 4,
+                            computer: 4,
+                            laptop: 3,
+                            mirror: 3,
+                            vase: 2,
+                            bottle: 2,
+                            plate: 3,
+                            cup: 1,
+                            table: 5,
+                            chair: 3,
+                            microwave: 4,
+                            clock: 2
+                        };
+                        
+                        object.health = healthMap[type] || 3;
+                        object.maxHealth = object.health;
+                        object.crackLevel = 0;
+                        
+                        // Use FULL screen width and height - no empty spaces
+                        const margin = 20; // Much smaller margin
+                        const maxX = window.innerWidth - 40; // Use almost full width
+                        const maxY = window.innerHeight - 40; // Use almost full height
+                        
+                        // Use simple random positioning across the ENTIRE screen
+                        let attempts = 0;
+                        let x, y;
+                        
+                        do {
+                            // Use the FULL width and height including left side
+                            x = margin + Math.random() * maxX;
+                            y = margin + Math.random() * maxY;
+                            attempts++;
+                        } while (this.isTooCloseToOtherObjects(x, y) && attempts < 15);
+                        
+                        // If we can't find a good spot, just place it randomly
+                        if (attempts >= 15) {
+                            x = margin + Math.random() * maxX;
+                            y = margin + Math.random() * maxY;
+                        }
+                        
+                        object.style.left = x + 'px';
+                        object.style.top = y + 'px';
+                        
+                        // Add health bar
+                        const healthBar = document.createElement('div');
+                        healthBar.className = 'health-bar';
+                        const healthFill = document.createElement('div');
+                        healthFill.className = 'health-fill';
+                        healthFill.style.width = '100%';
+                        healthBar.appendChild(healthFill);
+                        object.appendChild(healthBar);
+                        
+                        // Add click event for non-throw modes
+                        object.addEventListener('click', (e) => {
+                            if (!this.isThrowMode && !this.isSprayMode) {
+                                this.hitObject(e.target.closest('.object'));
+                                e.stopPropagation();
+                            }
+                        });
+                        
+                        // Add touch events for mobile
+                        object.addEventListener('touchstart', (e) => {
+                            if (!this.isThrowMode && !this.isSprayMode) {
+                                this.hitObject(e.target.closest('.object'));
+                                e.stopPropagation();
+                            }
+                        });
+                        
+                        this.gameContainer.appendChild(object);
+                        this.objects.push(object);
+                        
+                        // Update object interactions for new objects
+                        if (this.isThrowMode) {
+                            object.classList.add('throwable');
+                            object.style.cursor = 'grab';
+                        }
+                    }
                 }
             }
 
             spawnObject() {
-                // Ensure equal distribution of objects
+                // Spawn more of the objects you want
                 const typeCounts = {};
                 this.objects.forEach(obj => {
                     const objType = obj.className.split(' ')[1]; // Get the type from className
                     typeCounts[objType] = (typeCounts[objType] || 0) + 1;
                 });
                 
-                // Find the least common type
-                let leastCommonType = this.objectTypes[0];
-                let minCount = typeCounts[leastCommonType] || 0;
+                // Prefer laptops, chairs, and microwaves
+                const preferredTypes = ['laptop', 'chair', 'microwave', 'cup', 'computer'];
+                let type = preferredTypes[Math.floor(Math.random() * preferredTypes.length)];
                 
-                for (let type of this.objectTypes) {
-                    const count = typeCounts[type] || 0;
-                    if (count < minCount) {
-                        minCount = count;
-                        leastCommonType = type;
+                // 70% chance to spawn preferred types, 30% chance for others
+                if (Math.random() < 0.7) {
+                    type = preferredTypes[Math.floor(Math.random() * preferredTypes.length)];
+                } else {
+                    // Find the least common type for variety
+                    let leastCommonType = this.objectTypes[0];
+                    let minCount = typeCounts[leastCommonType] || 0;
+                    
+                    for (let objType of this.objectTypes) {
+                        const count = typeCounts[objType] || 0;
+                        if (count < minCount) {
+                            minCount = count;
+                            leastCommonType = objType;
+                        }
                     }
+                    type = leastCommonType;
                 }
                 
-                // 70% chance to spawn the least common type, 30% chance for random
-                const type = Math.random() < 0.7 ? leastCommonType : this.objectTypes[Math.floor(Math.random() * this.objectTypes.length)];
                 const object = document.createElement('div');
                 object.className = `object ${type}`;
                 
@@ -1265,11 +1383,11 @@
                     laptop: 3,
                     mirror: 3,
                     vase: 2,
-                    glass: 2,
                     bottle: 2,
                     plate: 3,
                     cup: 1,
                     table: 5,
+                    chair: 3,
                     microwave: 4,
                     clock: 2
                 };
@@ -1278,48 +1396,27 @@
                 object.maxHealth = object.health;
                 object.crackLevel = 0;
                 
-                // Even distribution across the entire screen
-                const margin = 50;
-                const maxX = window.innerWidth - 100;
-                const maxY = window.innerHeight - 100;
+                // Simple but effective distribution across the ENTIRE screen
+                const margin = 40;
+                const maxX = window.innerWidth - 80;
+                const maxY = window.innerHeight - 80;
                 
-                // Use zone-based distribution for even spread
-                const zones = 4; // 2x2 grid
-                const zoneWidth = maxX / zones;
-                const zoneHeight = maxY / zones;
+                // Use simple random positioning with better bounds
+                let attempts = 0;
+                let x, y;
                 
-                // Find the zone with the least objects
-                const zoneCounts = new Array(zones * zones).fill(0);
-                this.objects.forEach(obj => {
-                    const rect = obj.getBoundingClientRect();
-                    const zoneX = Math.floor((rect.left - margin) / zoneWidth);
-                    const zoneY = Math.floor((rect.top - margin) / zoneHeight);
-                    const zoneIndex = zoneY * zones + zoneX;
-                    if (zoneIndex >= 0 && zoneIndex < zones * zones) {
-                        zoneCounts[zoneIndex]++;
-                    }
-                });
+                do {
+                    // Use the FULL width and height
+                    x = margin + Math.random() * maxX;
+                    y = margin + Math.random() * maxY;
+                    attempts++;
+                } while (this.isTooCloseToOtherObjects(x, y) && attempts < 20);
                 
-                // Find the zone with the least objects
-                let targetZone = 0;
-                let zoneMinCount = zoneCounts[0];
-                for (let i = 1; i < zoneCounts.length; i++) {
-                    if (zoneCounts[i] < zoneMinCount) {
-                        zoneMinCount = zoneCounts[i];
-                        targetZone = i;
-                    }
+                // If we can't find a good spot, just place it randomly
+                if (attempts >= 20) {
+                    x = margin + Math.random() * maxX;
+                    y = margin + Math.random() * maxY;
                 }
-                
-                // Calculate position within the target zone
-                const zoneX = targetZone % zones;
-                const zoneY = Math.floor(targetZone / zones);
-                
-                // Add some randomness within the zone
-                const zoneOffsetX = Math.random() * zoneWidth * 0.8;
-                const zoneOffsetY = Math.random() * zoneHeight * 0.8;
-                
-                const x = margin + (zoneX * zoneWidth) + zoneOffsetX;
-                const y = margin + (zoneY * zoneHeight) + zoneOffsetY;
                 
                 object.style.left = x + 'px';
                 object.style.top = y + 'px';
@@ -1754,7 +1851,7 @@
             }
 
             isTooCloseToOtherObjects(x, y) {
-                const minDistance = 80; // Reduced for mobile
+                const minDistance = 40; // Much smaller to fit more objects
                 for (let obj of this.objects) {
                     const objRect = obj.getBoundingClientRect();
                     const objX = objRect.left + objRect.width / 2;
@@ -1772,10 +1869,10 @@
 
             startObjectSpawning() {
                 setInterval(() => {
-                    if (this.objects.length < 100) {
+                    if (this.objects.length < 300) { // Increased from 200 to 300
                         this.spawnObject();
                     }
-                }, 1000);
+                }, 500); // Reduced from 1000ms to 500ms for faster spawning
             }
         }
 
